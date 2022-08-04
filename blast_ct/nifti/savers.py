@@ -88,7 +88,7 @@ class NiftiPatchSaver(object):
                  num_reg_runs=1, native_space=True):
         assert isinstance(dataloader.dataset, FullImageToOverlappingPatchesNiftiDataset)
 
-        self.prediction_dir = os.path.join(job_dir, 'predictions')
+        self.prediction_dir = os.path.join(job_dir)
         self.prediction_csv_path = os.path.join(self.prediction_dir, 'prediction.csv')
         self.dataloader = dataloader
         self.dataset = dataloader.dataset

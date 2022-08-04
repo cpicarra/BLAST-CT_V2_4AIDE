@@ -20,37 +20,25 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-
-def get_remaining_dataset(test_csv_path, prediction_csv_path):
-    test_csv = pd.read_csv(test_csv_path, index_col='id')
-    prediction_csv = pd.read_csv(prediction_csv_path, index_col='id')
-    dataframe_yet_to_run = test_csv.loc[set(test_csv.index) - set(prediction_csv.index)]
-    # Saving new dataframe in tmp
-    new_test_csv_path = '/tmp/dataframe_yet_to_run.csv'
-    dataframe_yet_to_run.to_csv(new_test_csv_path, index_label='id')
-    return new_test_csv_path
+def set_device(device):
+    device = int(device) if device != 'cpu' else device
+    device = torch.device(device if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cpu':
+        print('Warning: running on CPU!')
+    return device
 
 
 def run_inference(job_dir, test_csv_path, config_file, device, saved_model_paths, write_prob_maps, do_localisation,
                   num_reg_runs, overwrite, native_space):
-    if not os.path.exists(job_dir):
-        os.makedirs(job_dir)
-        print('Starting new run...')
-    else:
-        prediction_csv_path = os.path.join(os.path.join(job_dir, 'predictions'), 'prediction.csv')
-        if overwrite:
-            print('Run already exists, overwriting...')
-            shutil.rmtree(job_dir)
-            os.makedirs(job_dir)
-        elif not overwrite and os.path.exists(prediction_csv_path):
-            print('Run already exists, completing run...')
-            test_csv_path = get_remaining_dataset(test_csv_path, prediction_csv_path)
 
     with open(config_file, 'r') as f:
         config = json.load(f)
+
     model = get_model(config)
+    # device = device if torch.cuda.is_available() else 'cpu'
     device = set_device(device)
     use_cuda = device.type != 'cpu'
+
     test_loader = get_test_loader(config, model, test_csv_path, use_cuda)
     extra_output_names = config['test']['extra_output_names'] if 'extra_output_names' in config['test'] else None
 
@@ -68,60 +56,75 @@ def run_inference(job_dir, test_csv_path, config_file, device, saved_model_paths
 
 
 def inference():
-    install_dir = os.path.dirname(os.path.realpath(__file__))
-    default_config = os.path.join(install_dir, 'data/config.json')
-    saved_model_paths = [os.path.join(install_dir, f'data/saved_models/model_{i:d}.pt') for i in range(1, 13)]
-    default_model_paths = ' '.join(saved_model_paths)
+    # install_dir = os.path.dirname(os.path.realpath(__file__))
+    # default_config = os.path.join(install_dir, 'data/config.json')
+    # saved_model_paths = [os.path.join(install_dir, f'data/saved_models/model_{i:d}.pt') for i in range(1, 13)]
+    # default_model_paths = ' '.join(saved_model_paths)
+    #
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--job-dir',
+    #                     required=True,
+    #                     type=str,
+    #                     help='Directory for checkpoints, exports, and '
+    #                          'logs. Use an existing directory to load a '
+    #                          'trained model, or a new directory to retrain')
+    # parser.add_argument('--test-csv-path',
+    #                     default=None,
+    #                     type=str,
+    #                     help='Path to test csv file with paths of images and masks.')
+    # parser.add_argument('--config-file',
+    #                     default=default_config,
+    #                     type=str,
+    #                     help='A json configuration file for the job (see example files)')
+    # parser.add_argument('--device',
+    #                     type=str,
+    #                     default='cpu',
+    #                     help='Device to use for computation')
+    # parser.add_argument('--saved-model-paths',
+    #                     default=default_model_paths,
+    #                     type=str,
+    #                     help='Path to saved model or list of paths separated by spaces.')
+    # parser.add_argument('--write-prob-maps',
+    #                     type=str2bool, nargs='?',
+    #                     const=True,
+    #                     default=False,
+    #                     help='Whether to write probability maps images to disk')
+    # parser.add_argument('--do-localisation',
+    #                     type=str2bool, nargs='?',
+    #                     const=True,
+    #                     default=False,
+    #                     help='Whether to run localisation or not')
+    # parser.add_argument('--num-reg-runs',
+    #                     default=1,
+    #                     type=int,
+    #                     help='How many times to run registration between native scan and CT template.')
+    # parser.add_argument('--overwrite',
+    #                     type=str2bool, nargs='?',
+    #                     const=True,
+    #                     default=False,
+    #                     help='Whether to overwrite run if already exists')
+    # parser.add_argument('--native-space',
+    #                     type=str2bool, nargs='?',
+    #                     const=True,
+    #                     default=True,
+    #                     help='Whether to calculate the volumes in native space or atlas space.')
+    # parse_args, unknown = parser.parse_known_args()
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--job-dir',
-                        required=True,
-                        type=str,
-                        help='Directory for checkpoints, exports, and '
-                             'logs. Use an existing directory to load a '
-                             'trained model, or a new directory to retrain')
-    parser.add_argument('--test-csv-path',
-                        default=None,
-                        type=str,
-                        help='Path to test csv file with paths of images and masks.')
-    parser.add_argument('--config-file',
-                        default=default_config,
-                        type=str,
-                        help='A json configuration file for the job (see example files)')
-    parser.add_argument('--device',
-                        type=str,
-                        default='cpu',
-                        help='Device to use for computation')
-    parser.add_argument('--saved-model-paths',
-                        default=default_model_paths,
-                        type=str,
-                        help='Path to saved model or list of paths separated by spaces.')
-    parser.add_argument('--write-prob-maps',
-                        type=str2bool, nargs='?',
-                        const=True,
-                        default=False,
-                        help='Whether to write probability maps images to disk')
-    parser.add_argument('--do-localisation',
-                        type=str2bool, nargs='?',
-                        const=True,
-                        default=False,
-                        help='Whether to run localisation or not')
-    parser.add_argument('--num-reg-runs',
-                        default=1,
-                        type=int,
-                        help='How many times to run registration between native scan and CT template.')
-    parser.add_argument('--overwrite',
-                        type=str2bool, nargs='?',
-                        const=True,
-                        default=False,
-                        help='Whether to overwrite run if already exists')
-    parser.add_argument('--native-space',
-                        type=str2bool, nargs='?',
-                        const=True,
-                        default=True,
-                        help='Whether to calculate the volumes in native space or atlas space.')
-    parse_args, unknown = parser.parse_known_args()
-    run_inference(**parse_args.__dict__)
+    # run_inference(**parse_args.__dict__)
+
+    config_file_path = '/tmp/config.json'
+    saved_model_paths = ' '.join([os.path.join(f'/tmp/model_{i:d}.pt') for i in range(1, 15)])
+    input_image_path = '/tmp/image.nii.gz'
+    job_dir = '/tmp/'
+    test_csv_path = os.path.join(job_dir, 'test.csv')
+    pd.DataFrame(data=[['im_0', input_image_path]], columns=['id', 'image']).to_csv(test_csv_path, index=False)
+    do_localisation = True
+    native_space = True
+    num_reg_runs = 1
+    write_probability_maps = False
+    overwrite = True
+
+    run_inference(job_dir, test_csv_path, config_file_path, )
 
 
 if __name__ == "__main__":
