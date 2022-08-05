@@ -89,19 +89,16 @@ class NiftiPatchSaver(object):
         assert isinstance(dataloader.dataset, FullImageToOverlappingPatchesNiftiDataset)
 
         self.prediction_dir = os.path.join(job_dir)
-        self.prediction_csv_path = os.path.join(self.prediction_dir, 'prediction.csv')
+        self.prediction_csv_path = os.path.join(self.prediction_dir, 'predicted_volumes.csv')
         self.dataloader = dataloader
         self.dataset = dataloader.dataset
         self.write_prob_maps = write_prob_maps
         self.patches = []
         self.extra_output_patches = {key: [] for key in extra_output_names} if extra_output_names is not None else {}
         self.image_index = 0
-        if os.path.exists(self.prediction_csv_path):
-            self.prediction_index = pd.read_csv(self.prediction_csv_path, index_col='id')
-        else:
-            self.prediction_index = pd.DataFrame(columns=self.dataset.data_index.columns)
+        self.prediction_index = pd.DataFrame(columns=self.dataset.data_index.columns)
 
-        localisation_dir = os.path.join(job_dir, 'localisation')
+        localisation_dir = os.path.join(job_dir)
         self.localisation = Localisation(localisation_dir, num_reg_runs, native_space) if do_localisation else None
 
     def reset(self):
@@ -148,7 +145,11 @@ class NiftiPatchSaver(object):
             columns = self.dataset.data_index.columns
             self.prediction_index.loc[image_id, columns] = self.dataset.data_index.loc[image_id, columns]
             for name, array in to_write.items():
-                path = os.path.join(self.prediction_dir, f'{str(image_id):s}_{name:s}.nii.gz')
+                if name == 'prediction':
+                    path = os.path.join(self.prediction_dir, 'predicted_segmentation.nii.gz')
+                else:
+                    path = os.path.join(self.prediction_dir, f'{str(image_id):s}_{name:s}.nii.gz')
+
                 self.prediction_index.loc[image_id, name] = path
                 try:
                     output_image = save_image(array, input_image, path, resolution)

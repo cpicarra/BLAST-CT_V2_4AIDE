@@ -6,7 +6,6 @@ import shutil
 
 from blast_ct.nifti.savers import NiftiPatchSaver
 from blast_ct.read_config import get_model, get_test_loader
-from blast_ct.train import set_device
 from blast_ct.trainer.inference import ModelInference, ModelInferenceEnsemble
 
 
@@ -20,24 +19,18 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def set_device(device):
-    device = int(device) if device != 'cpu' else device
-    device = torch.device(device if torch.cuda.is_available() else 'cpu')
-    if device.type == 'cpu':
-        print('Warning: running on CPU!')
-    return device
 
-
-def run_inference(job_dir, test_csv_path, config_file, device, saved_model_paths, write_prob_maps, do_localisation,
-                  num_reg_runs, overwrite, native_space):
+def run_inference(job_dir, test_csv_path, config_file, saved_model_paths, write_prob_maps, do_localisation,
+                  num_reg_runs, native_space):
 
     with open(config_file, 'r') as f:
         config = json.load(f)
 
     model = get_model(config)
-    # device = device if torch.cuda.is_available() else 'cpu'
-    device = set_device(device)
-    use_cuda = device.type != 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    if device == 'cpu':
+        print('Warning: running on CPU!')
+    use_cuda = device == 'cuda'
 
     test_loader = get_test_loader(config, model, test_csv_path, use_cuda)
     extra_output_names = config['test']['extra_output_names'] if 'extra_output_names' in config['test'] else None
@@ -112,19 +105,19 @@ def inference():
 
     # run_inference(**parse_args.__dict__)
 
-    config_file_path = '/tmp/config.json'
-    saved_model_paths = ' '.join([os.path.join(f'/tmp/model_{i:d}.pt') for i in range(1, 15)])
+    config_file_path = 'blast_ct/data/config.json'
+    saved_model_paths = ' '.join([os.path.join(f'blast_ct/models/saved_models/model_{i:d}.pt') for i in range(1, 15)])
     input_image_path = '/tmp/image.nii.gz'
     job_dir = '/tmp/'
     test_csv_path = os.path.join(job_dir, 'test.csv')
-    pd.DataFrame(data=[['im_0', input_image_path]], columns=['id', 'image']).to_csv(test_csv_path, index=False)
+    pd.DataFrame(data=[['image', input_image_path]], columns=['id', 'image']).to_csv(test_csv_path, index=False)
     do_localisation = True
     native_space = True
     num_reg_runs = 1
     write_probability_maps = False
-    overwrite = True
 
-    run_inference(job_dir, test_csv_path, config_file_path, )
+    run_inference(job_dir, test_csv_path, config_file_path, saved_model_paths,
+                  write_probability_maps, do_localisation, num_reg_runs, native_space)
 
 
 if __name__ == "__main__":
