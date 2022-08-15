@@ -19,12 +19,11 @@ spec:
   - name: basegenerator
     container:
       image: biomediaicl/basegenerator:latest
-      command: [sh, -c]
-      args: ["echo 'hello biomedia' | tee /tmp/hello_world.txt"]
     outputs:
       artifacts:
       - name: hello-art
-        path: /home/image.png
+        path: /home/2wXY597_CT3_image.nii.gz
+
 
   - name: processdata
     inputs:
@@ -32,8 +31,8 @@ spec:
       # unpack the message input artifact
       # and put it at /tmp/message
       - name: message
-        path: /tmp/image.png
+        path: /tmp/image.nii.gz
     container:
       image: biomediaicl/ratchet_argo:latest
       command: [python]
-      args: ["/code/RATCHET/run_model.py"]
+      args: ["/code/blast_ct/inference.py"]
