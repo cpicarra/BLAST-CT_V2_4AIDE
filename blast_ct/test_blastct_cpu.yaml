@@ -33,6 +33,6 @@ spec:
       - name: message
         path: /tmp/image.nii.gz
     container:
-      image: biomediaicl/ratchet_argo:latest
+      image: biomediaicl/blast_ct:latest
       command: [python]
-      args: ["/code/blast_ct/inference.py"]
+      args: ["/code/BLAST_CT_V2_4AIDE/blast_ct/inference.py"]
