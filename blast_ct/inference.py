@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 import pandas as pd
-import shutil
+import torch
 
 from blast_ct.nifti.savers import NiftiPatchSaver
 from blast_ct.read_config import get_model, get_test_loader
