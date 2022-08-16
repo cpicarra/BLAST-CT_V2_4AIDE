@@ -106,7 +106,7 @@ def inference():
     # run_inference(**parse_args.__dict__)
 
     config_file_path = '/code/BLAST_CT_V2_4AIDE/blast_ct/data/config.json'
-    saved_model_paths = ' '.join([os.path.join(f'/code/BLAST_CT_V2_4AIDE/blast_ct/models/saved_models/model_{i:d}.pt') for i in range(1, 15)])
+    saved_model_paths = ' '.join([os.path.join(f'/code/BLAST_CT_V2_4AIDE/blast_ct/models/saved_models/model_{i:d}.torch_model') for i in range(1, 15)])
     # input_image_path = '/tmp/image.nii.gz'
     input_image_path = '/code/BLAST_CT_V2_4AIDE/image.nii.gz'
     job_dir = '/tmp/'
