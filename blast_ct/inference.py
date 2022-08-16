@@ -107,7 +107,8 @@ def inference():
 
     config_file_path = '/code/BLAST_CT_V2_4AIDE/blast_ct/data/config.json'
     saved_model_paths = ' '.join([os.path.join(f'/code/BLAST_CT_V2_4AIDE/blast_ct/models/saved_models/model_{i:d}.pt') for i in range(1, 15)])
-    input_image_path = '/tmp/image.nii.gz'
+    # input_image_path = '/tmp/image.nii.gz'
+    input_image_path = '/code/BLAST_CT_V2_4AIDE/image.nii.gz'
     job_dir = '/tmp/'
     test_csv_path = os.path.join(job_dir, 'test.csv')
     pd.DataFrame(data=[['image', input_image_path]], columns=['id', 'image']).to_csv(test_csv_path, index=False)
