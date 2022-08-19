@@ -22,6 +22,8 @@ RUN cd /code \
     && apt-get update && apt-get install -y git wget unzip nano
 ADD https://api.github.com/repos/cpicarra/BLAST-CT_V2_4AIDE/git/refs/heads/localisation_foraide version.json
 RUN git clone -b localisation_foraide https://github.com/cpicarra/BLAST_CT_V2_4AIDE.git
-RUN ls /code/BLAST_CT_V2_4AIDE
-RUN pip3 --disable-pip-version-check --no-cache-dir install -r ./BLAST_CT_V2_4AIDE/requirements.txt
+RUN ls /code/BLAST_CT_V2_4AIDE \
+    && cp /code/BLAST_CT_V2_4AIDE/requirements.txt /tmp/pip-tmp/
+RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
+    && rm -rf /tmp/pip-tmp
 WORKDIR /code/BLAST_CT_V2_4AIDE
