@@ -2,5 +2,5 @@ scipy
 numpy
 pandas
 SimpleITK==1.2.4
-torch==1.8.0
+torch==1.9.0
 tensorboard
