@@ -30,8 +30,10 @@ def run_inference(job_dir, test_csv_path, config_file, saved_model_paths, write_
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if device == 'cpu':
         print('Warning: running on CPU!')
-    use_cuda = device == 'cuda'
+    else:
+        print("Running on GPU")
 
+    use_cuda = device == 'cuda'
     test_loader = get_test_loader(config, model, test_csv_path, use_cuda)
     extra_output_names = config['test']['extra_output_names'] if 'extra_output_names' in config['test'] else None
 
@@ -111,7 +113,7 @@ def inference():
     input_image_path = '/code/BLAST_CT_V2_4AIDE/image.nii.gz'
     job_dir = '/tmp/'
     test_csv_path = os.path.join(job_dir, 'test.csv')
-    pd.DataFrame(data=[['image', input_image_path]], columns=['id', 'image']).to_csv(test_csv_path, index=False)
+    pd.DataFrame(data=[['ct_image', input_image_path]], columns=['id', 'image']).to_csv(test_csv_path, index=False)
     do_localisation = True
     native_space = True
     num_reg_runs = 1
