@@ -10,4 +10,4 @@ WORKDIR /code
 RUN cd /code
 RUN pip3 install git+https://github.com/cpicarra/BLAST_CT_V2_4AIDE.git#localisation_foraide
 
-CMD ["blast-ct-inference"]
+# CMD ["blast-ct-inference"]
