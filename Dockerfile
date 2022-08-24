@@ -27,5 +27,5 @@ RUN git clone -b localisation_foraide https://github.com/cpicarra/BLAST_CT_V2_4A
 RUN pip3 --disable-pip-version-check --no-cache-dir install -r /code/BLAST_CT_V2_4AIDE/requirements.txt
 WORKDIR /code/BLAST_CT_V2_4AIDE
 ENTRYPOINT ["python3"]
-# CMD ["exec(open('/code/BLAST_CT_V2_4AIDE/blast_ct/inference.py').read())"]
+CMD ["exec(open('/code/BLAST_CT_V2_4AIDE/blast_ct/inference.py').read())"]
 
