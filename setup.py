@@ -26,7 +26,7 @@ setuptools.setup(
     },
     install_requires=[
         'scipy==1.4.1',
-        'numpy==1.18.2',
+        'numpy',
         'pandas==1.0.3',
         'SimpleITK==1.2.4',
         'torch==1.9.0',

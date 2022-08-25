@@ -34,5 +34,5 @@ spec:
         path: /tmp/image.nii.gz
     container:
       image: biomediaicl/blast_ct:latest
-      command: [python3]
-      args: ["/code/BLAST_CT_V2_4AIDE/blast_ct/inference.py"]
+      command: [blast-ct-inference]
+
