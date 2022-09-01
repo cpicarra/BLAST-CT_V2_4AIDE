@@ -3,7 +3,6 @@ import pandas as pd
 import SimpleITK as sitk
 import numpy as np
 import torch
-import pandas as pd
 from blast_ct.localisation.localise_lesions import LesionVolumeLocalisationMNI
 from blast_ct.localisation.register_to_template import RegistrationToCTTemplate
 from blast_ct.nifti.datasets import FullImageToOverlappingPatchesNiftiDataset
@@ -19,7 +18,7 @@ def add_predicted_volumes_to_dataframe(dataframe, id_, array, resolution):
         if i == 0:
             continue
         volume = np.sum(array == i) * voxel_volume_ml
-        dataframe.loc[id_, f'{class_name:s}_predicted_volume_ml'] = volume
+        dataframe.loc[id_, f'{class_name:s}_predicted_volume_ml'] = round(volume, 2)
     return dataframe
 
 
@@ -155,7 +154,7 @@ class NiftiPatchSaver(object):
                     output_image = save_image(array, input_image, path, resolution)
                     if name == 'prediction':
                         self.prediction_index = add_predicted_volumes_to_dataframe(self.prediction_index, image_id,
-                                                                                   array,
+                                                                                   sitk.GetArrayFromImage(output_image),
                                                                                    resolution)
                         if self.localisation is not None:
                             self.prediction_index = self.localisation(self.prediction_index, image_id, input_image,
